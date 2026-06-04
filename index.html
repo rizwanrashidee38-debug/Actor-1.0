@@ -1,10 +1,11 @@
 
-<!DOCTYPE html>
+                                
+                  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mumbai Dreams: The Complete Life Simulator</title>
+    <title>Mumbai Dreams: Superstar Life Simulator</title>
     <style>
         :root {
             --gold: #ffcc00;
@@ -15,6 +16,7 @@
             --text-muted: #cfb4b9;
             --scandal: #ff3333;
             --green: #2ecc71;
+            --insta: #e1306c;
         }
 
         body {
@@ -27,7 +29,7 @@
 
         .container { max-width: 1350px; margin: 0 auto; }
 
-        /* Setup */
+        /* Setup Screen */
         #creation-screen {
             background: var(--card-bg);
             border: 2px solid var(--gold);
@@ -35,18 +37,20 @@
             border-radius: 12px;
             max-width: 500px;
             margin: 40px auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; color: var(--gold); font-weight: bold; font-size: 0.9rem; }
         .form-group input, .form-group select {
             width: 100%; padding: 8px; background: #000; color: white; border: 1px solid #444; border-radius: 4px;
+            box-sizing: border-box;
         }
 
         #game-screen { display: none; }
         header { text-align: center; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
-        h1 { margin: 0; color: var(--gold); font-size: 2rem; }
+        h1 { margin: 0; color: var(--gold); font-size: 2rem; text-shadow: 2px 2px 4px #000; }
 
-        /* Grids */
+        /* Layout Grids */
         .main-layout { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; }
         @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } }
 
@@ -64,22 +68,24 @@
         .stat-card h3 { margin: 0; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
         .stat-card p { margin: 2px 0 0 0; font-size: 1rem; font-weight: bold; color: var(--gold); }
 
-        /* UI elements */
+        /* Buttons & Interface elements */
         .btn {
             background: #33050c; color: white; border: 1px solid var(--gold);
-            padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
+            padding: 8px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
             width: 100%; margin-bottom: 6px; font-size: 0.8rem; text-align: left;
+            transition: background 0.2s;
         }
         .btn:hover { background: #4d0b16; }
         .btn-gold { background: var(--gold); color: black; border: 1px solid #000; text-align: center; }
         .btn-gold:hover { background: #ffe066; }
         .btn-danger { background: #730a11; border: 1px solid var(--scandal); }
+        .btn-danger:hover { background: #96131c; }
 
-        .card { background: #0d0405; border: 1px solid #3d141b; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; }
+        .card { background: #0d0405; border: 1px solid #3d141b; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.4; }
         #log { height: 220px; overflow-y: auto; background: #050102; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 0.8rem; }
         .log-entry { margin-bottom: 4px; border-left: 3px solid var(--gold); padding-left: 6px; }
         
-        .badge { display: inline-block; padding: 2px 5px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; margin-top: 3px; }
+        .badge { display: inline-block; padding: 2px 5px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; margin-top: 3px; margin-right: 3px; }
         .badge-scandal { background: var(--scandal); color: white; }
         .badge-safe { background: var(--green); color: white; }
     </style>
@@ -88,13 +94,13 @@
 
 <div class="container">
 
-    <!-- SETUP SCREEN -->
+    <!-- CHARACTER CREATION SETUP -->
     <div id="creation-screen">
         <h2 style="text-align: center; border:none;">Mumbai Talent Registry</h2>
         <div class="form-group"><label>Screen Name</label><input type="text" id="p-name" value="Zoya Khan"></div>
         <div class="form-group">
             <label>Gender</label>
-            <select id="p-gender" onchange="toggleGenderSpecifics()"><option value="Female">Female</option><option value="Male">Male</option></select>
+            <select id="p-gender"><option value="Female">Female</option><option value="Male">Male</option></select>
         </div>
         <div class="form-group">
             <label>Religion & Cultural Values</label>
@@ -107,12 +113,12 @@
         </div>
         <div class="form-group">
             <label>Home Region</label>
-            <select id="p-region"><option value="Delhi">Delhi NCR</option><option value="Mumbai">Mumbai</option><option value="Punjab">Punjab</option><option value="Kerala">Kerala</option></select>
+            <select id="p-region"><option value="Delhi NCR">Delhi NCR</option><option value="Mumbai">Mumbai</option><option value="Punjab">Punjab</option><option value="Kerala">Kerala</option></select>
         </div>
         <button class="btn btn-gold" style="margin-top:10px;" onclick="startGame()">Step Into Versova Casting Hub 🚕</button>
     </div>
 
-    <!-- MAIN GAME INTERFACE -->
+    <!-- MAIN GAME INLINE INTERFACE -->
     <div id="game-screen">
         <header>
             <h1 id="display-name">Actor</h1>
@@ -127,19 +133,19 @@
             <div class="stat-card"><h3>Mental Health</h3><p id="stat-sanity">100%</p></div>
             <div class="stat-card"><h3>Acting Skill</h3><p id="stat-skill">10</p></div>
             <div class="stat-card"><h3>Looks / Aesthetic</h3><p id="stat-looks">40</p></div>
-            <div class="stat-card"><h3>Public Rep</h3><p id="stat-rep">75%</p></div>
+            <div class="stat-card"><h3>Sanskari Image</h3><p id="stat-rep">75%</p></div>
         </div>
 
         <div class="main-layout">
             
-            <!-- COLUMN 1: WARDROBE, ROUTINE & HEALTH -->
+            <!-- COLUMN 1: WARDROBE, ROUTINE & HOUSING -->
             <div>
                 <div class="panel">
                     <h2>Dressing & Aesthetics</h2>
-                    <div class="card">Current Style: <span id="current-dress-label" style="font-weight:bold; color:var(--gold);">Traditional Kurti</span></div>
+                    <div class="card">Current Style: <span id="current-dress-label" style="font-weight:bold; color:var(--gold);">Casual</span></div>
                     <select id="select-dress" class="form-group" style="background:#000; color:white; width:100%; padding:5px;" onchange="game.changeDress()">
-                        <option value="Traditional">Traditional Sanskari Indian Wear (+15% Rep, -5 Looks)</option>
                         <option value="Casual">Casual Western Jeans & Tee (Neutral)</option>
+                        <option value="Traditional">Traditional Sanskari Indian Wear (+15% Rep, -5 Looks)</option>
                         <option value="Bold">Bold Designer/Revealing Gown (-15% Rep, +25 Looks)</option>
                     </select>
                 </div>
@@ -164,7 +170,7 @@
                 </div>
             </div>
 
-            <!-- COLUMN 2: THE PRIVATE LIFE SUITE (DATING & KIDS) -->
+            <!-- COLUMN 2: THE PRIVATE LIFE SUITE (DATING, CONTRACEPTIVES & KIDS) -->
             <div>
                 <div class="panel">
                     <h2>Primary Romantic Life</h2>
@@ -204,8 +210,17 @@
                 </div>
             </div>
 
-            <!-- COLUMN 3: PROFESSION, DARK SECTOR & TICKER -->
+            <!-- COLUMN 3: CONTRACTS, MONETIZATION & DARKSIDE -->
             <div>
+                <div class="panel">
+                    <h2>Digital Footprint & Ads</h2>
+                    <div class="card" style="line-height: 1.6;">
+                        📸 Followers: <span id="sm-insta" style="font-weight:bold; color:var(--insta);">1.5K</span><br>
+                        💼 Ads Model: <span id="sm-monetization" style="font-style:italic;">Locked (&lt;100K followers)</span>
+                    </div>
+                    <button class="btn btn-gold" id="btn-ad-deal" style="display:none;" onclick="game.executeBrandDeal()">Sign Active Brand Endorsement Deal</button>
+                </div>
+
                 <div class="panel">
                     <h2>Active Professional Contract</h2>
                     <div id="current-project-box" class="card">Funemployed.</div>
@@ -213,7 +228,7 @@
                 </div>
 
                 <div class="panel" style="border: 1px solid var(--scandal);">
-                    <h2 style="color:var(--scandal);">Secret Affairs (The Dark Side)</h2>
+                    <h2 style="color:var(--scandal);">Secret Affairs / Hookups (Dark Side)</h2>
                     <div id="affair-box" class="card" style="border-color:#4a0612;">No ongoing secret affairs.</div>
                     <button class="btn btn-danger" onclick="game.findAffair()">Target a Married Producer/Co-Star for an Affair</button>
                     <button class="btn btn-danger" id="btn-affair-sex" style="display:none;" onclick="game.haveAffairSex()">Sneak into Vanity Van for Secret Sex</button>
@@ -227,7 +242,7 @@
 
         </div>
 
-        <!-- Ticker -->
+        <!-- Ticker Log -->
         <div class="panel">
             <h2>Bollywood Radar (Tabloid Machine & WhatsApp Blinds)</h2>
             <div id="log"></div>
@@ -237,35 +252,36 @@
 </div>
 
 <script>
-// Database Assets
+// Content Matrix
 const HOUSING_LIST = [
-    { name: "1BHK Shared PG (Andheri West)", rent: 12000, profileChance: 1.0 },
-    { name: "Boutique 1BHK Flat (Goregaon East)", rent: 35000, profileChance: 1.5 },
-    { name: "Luxury Highrise (Bandra West)", rent: 110000, profileChance: 3.0 },
-    { name: "Sea-facing Penthouse (Juhu)", rent: 400000, profileChance: 6.0 }
+    { name: "1BHK Shared PG (Andheri West)", rent: 12000 },
+    { name: "Boutique 1BHK Flat (Goregaon East)", rent: 35000 },
+    { name: "Luxury Highrise (Bandra West)", rent: 110000 },
+    { name: "Sea-facing Penthouse (Juhu)", rent: 400000 }
 ];
 
 const CASTING_CALLS = [
-    { title: "Crime Thriller Web-Series", reqSkill: 15, reqLooks: 20, pay: 80000, duration: 4, fame: 50 },
-    { title: "Balaji Telefilms Lead Role", reqSkill: 30, reqLooks: 45, pay: 250000, duration: 6, fame: 300 },
-    { title: "Pan-India Action Blockbuster", reqSkill: 60, reqLooks: 75, pay: 5000000, duration: 8, fame: 4000 }
+    { title: "Crime Thriller Web-Series", reqSkill: 15, reqLooks: 20, pay: 80000, duration: 4, fame: 5000 },
+    { title: "Balaji Telefilms Lead Role", reqSkill: 30, reqLooks: 45, pay: 250000, duration: 6, fame: 25000 },
+    { title: "Pan-India Action Blockbuster", reqSkill: 60, reqLooks: 75, pay: 5000000, duration: 8, fame: 150000 }
 ];
 
-class HyperLifeSimulator {
+class CompleteActorSimulator {
     constructor(name, gender, religion, region) {
         this.name = name; this.gender = gender; this.religion = religion; this.region = region;
         this.money = 30000; this.energy = 100; this.sanity = 100; this.skill = 10; this.looks = 40; this.rep = 75;
         this.day = 1; this.month = 1; this.insta = 1500;
 
-        // Life Variables
+        // Variables
         this.dress = "Casual";
         this.contraceptive = "None";
         this.illness = null;
         this.housingIndex = 0;
+        this.isMonetized = false;
         
-        this.partner = null;       // Main Relationship
-        this.affair = null;        // Illicit Affair
-        this.pregnancyDays = 0;    // Pregnancy tracking counter
+        this.partner = null;       // Main Relationship / Marriage
+        this.affair = null;        // Side Fling
+        this.pregnancyDays = 0;    // Pregnancy tracking step
         this.children = 0;
         this.currentProject = null;
         this.awards = [];
@@ -279,11 +295,10 @@ class HyperLifeSimulator {
         this.generateAuditions();
         this.generateDatingMarket();
         this.updateUI();
-        this.log(`📍 Landed in Mumbai. You adjusted your dress to ${this.dress} style. The hustle begins.`);
+        this.log(`📍 Landed in Mumbai. You adjusted your wardrobe style to ${this.dress}. The hustle begins!`);
     }
 
     updateUI() {
-        // Safe limits
         this.energy = Math.max(0, Math.min(100, this.energy));
         this.sanity = Math.max(0, Math.min(100, this.sanity));
         this.rep = Math.max(0, Math.min(100, this.rep));
@@ -298,29 +313,43 @@ class HyperLifeSimulator {
         document.getElementById('current-dress-label').innerText = this.dress;
         document.getElementById('contraceptive-label').innerText = this.contraceptive;
 
-        // Illness layout
+        // Monetization Dashboard Checks
+        document.getElementById('sm-insta').innerText = this.formatNum(this.insta);
+        const monStatus = document.getElementById('sm-monetization');
+        const adBtn = document.getElementById('btn-ad-deal');
+        if (this.insta >= 100000) {
+            this.isMonetized = true;
+            monStatus.innerHTML = `<span style="color:var(--green); font-weight:bold;">Active</span> | Passive Yield: ₹${Math.floor(this.insta * 0.08).toLocaleString('en-IN')}/mo`;
+            adBtn.style.display = 'block';
+        } else {
+            this.isMonetized = false;
+            monStatus.innerText = `Locked (Needs 100K followers. You need ${(100000 - this.insta).toLocaleString()} more)`;
+            adBtn.style.display = 'none';
+        }
+
+        // Illness layout panel
         const hBox = document.getElementById('health-status-box');
         const hBtn = document.getElementById('btn-treat-illness');
         if (this.illness) {
             hBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">⚠️ Illness: ${this.illness.name}</span><br><small>Effects: ${this.illness.desc}</small>`;
             hBtn.style.display = 'block';
         } else {
-            hBox.innerText = "Health: Balanced, No physical pathologies.";
+            hBox.innerText = "Health: Perfect Body Condition";
             hBtn.style.display = 'none';
         }
 
-        // Housing Panel
+        // Housing
         document.getElementById('housing-box').innerHTML = `<strong>Unit:</strong> ${HOUSING_LIST[this.housingIndex].name}<br><small>Rent: ₹${HOUSING_LIST[this.housingIndex].rent.toLocaleString('en-IN')}/mo</small>`;
 
-        // Main Relationship UI Management
+        // Primary Relationship UI Management
         const rBox = document.getElementById('relationship-box');
         const rControls = document.getElementById('relationship-controls');
         if (this.partner) {
             rBox.innerHTML = `
                 <strong>Partner:</strong> ${this.partner.name} (${this.partner.religion})<br>
                 <small>Type: ${this.partner.type} | Love Level: ${this.partner.love}%</small><br>
-                <span class="badge ${this.partner.secret ? 'badge-scandal' : 'badge-safe'}">${this.partner.secret ? 'Secret Status' : 'Public/Aesthetic Couple'}</span>
-                <span class="badge ${this.partner.liveIn ? 'badge-scandal' : 'badge-safe'}">${this.partner.liveIn ? 'Live-In Arrangement' : 'Living Separately'}</span>
+                <span class="badge ${this.partner.secret ? 'badge-scandal' : 'badge-safe'}">${this.partner.secret ? 'Secret Relation' : 'Public Couple'}</span>
+                <span class="badge ${this.partner.liveIn ? 'badge-scandal' : 'badge-safe'}">${this.partner.liveIn ? 'Live-In Status' : 'Living Separately'}</span>
                 ${this.partner.married ? '<br><span class="badge badge-safe">💍 Legally Married</span>' : ''}
             `;
             rControls.style.display = 'block';
@@ -329,7 +358,7 @@ class HyperLifeSimulator {
             rControls.style.display = 'none';
         }
 
-        // Affair UI Management
+        // Dark Side Affair UI Management
         const affBox = document.getElementById('affair-box');
         const affSexBtn = document.getElementById('btn-affair-sex');
         if (this.affair) {
@@ -345,7 +374,7 @@ class HyperLifeSimulator {
         const pregCtrl = document.getElementById('pregnancy-controls');
         const kidBox = document.getElementById('children-box');
         if (this.pregnancyDays > 0) {
-            pregBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🤰 PREGNANT (${Math.floor(this.pregnancyDays / 10)} Weeks)</span><br><small>Energy draining faster. Noticeable physical profile change.</small>`;
+            pregBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🤰 PREGNANT (${Math.floor(this.pregnancyDays / 10)} Weeks)</span><br><small>Energy draining. Noticeable profile change.</small>`;
             pregCtrl.style.display = 'block';
         } else {
             pregBox.innerText = "No active reproductive developments.";
@@ -353,21 +382,21 @@ class HyperLifeSimulator {
         }
         if (this.children > 0) {
             kidBox.style.display = 'block';
-            kidBox.innerHTML = `👶 Children Raised: ${this.children} (Passive monthly maintenance overhead)`;
+            kidBox.innerHTML = `👶 Children Raised: ${this.children} (Passive monthly family expenses applied)`;
         } else { kidBox.style.display = 'none'; }
 
-        // Render Local Dating Market Profiles
-        const mBox = document.getElementById('dating-market-box'); mBox.innerHTML = '';
+        // Render Dating Pools
+        const dmBox = document.getElementById('dating-market-box'); dmBox.innerHTML = '';
         this.marketProfiles.forEach((prof, idx) => {
-            mBox.innerHTML += `
+            dmBox.innerHTML += `
                 <div class="card">
                     <strong>${prof.name}</strong> (${prof.religion})<br>
-                    <small>Profile: ${prof.type} | Acceptability Index: ${prof.statusValue}</small><br>
+                    <small>Profile: ${prof.type} | Value Score: ${prof.statusValue}</small><br>
                     <button class="btn btn-gold" style="margin-top:4px; padding:2px; font-size:0.7rem;" onclick="game.initiateDating(${idx})">Ask Out / Pursue</button>
                 </div>`;
         });
 
-        // Professional System Rendering
+        // Professional Rendering
         const pBox = document.getElementById('current-project-box');
         if (this.currentProject) {
             pBox.innerHTML = `<strong>Shooting: ${this.currentProject.title}</strong><br><small>Months Left: ${this.currentProject.timeLeft}</small>`;
@@ -386,6 +415,12 @@ class HyperLifeSimulator {
         awBox.innerHTML = this.awards.length > 0 ? this.awards.map(a => `🏆 ${a}`).join('<br>') : "No awards on shelf.";
     }
 
+    formatNum(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return n;
+    }
+
     log(m) {
         const lb = document.getElementById('log');
         lb.innerHTML = `<div class="log-entry">${m}</div>` + lb.innerHTML;
@@ -393,7 +428,7 @@ class HyperLifeSimulator {
 
     changeDress() {
         this.dress = document.getElementById('select-dress').value;
-        this.log(`👗 Wardrobe Adjusted: You shifted your public profile look to ${this.dress}. Aesthetics updated.`);
+        this.log(`👗 Wardrobe Adjusted: You shifted your public look to ${this.dress}.`);
         if (this.dress === "Bold") { this.looks += 20; this.rep -= 15; }
         if (this.dress === "Traditional") { this.looks -= 5; this.rep += 15; }
         this.updateUI();
@@ -401,19 +436,19 @@ class HyperLifeSimulator {
 
     changeContraceptive() {
         this.contraceptive = document.getElementById('select-contraceptive').value;
-        this.log(`💊 Protection Protocol: Switched to ${this.contraceptive}. Risk profiles modified.`);
+        this.log(`💊 Protection Protocol: Switched to ${this.contraceptive}.`);
         this.updateUI();
     }
 
     generateDatingMarket() {
         this.marketProfiles = [];
-        const poolNames = ["Aarav Sharma", "Zayn Malik", "Rohan Kapoor", "Ananya Pandey", "Meera Iyer", "Sania Sheikh"];
-        const religions = ["Hindu (Traditional/Vegetarian)", "Muslim (Traditional/Conservative)", "Christian (Goan/Anglo)", "Sikh (Punjabi Roots)"];
+        const poolNames = ["Aarav Malhotra", "Zayn Khan", "Rohan Kapoor", "Ananya Pandey", "Meera Iyer", "Sania Sheikh"];
+        const religions = ["Hindu (Traditional)", "Muslim (Traditional)", "Christian (Goan)", "Sikh (Punjabi Roots)"];
         const types = ["Struggling Model", "Nepo-Kid Influencer", "Indie Film Director", "Bandra Corporate Elite"];
         
         for (let i = 0; i < 3; i++) {
             this.marketProfiles.push({
-                name: poolNames[Math.floor(Math.random() * poolNames.length)] + " " + (i+1),
+                name: poolNames[Math.floor(Math.random() * poolNames.length)],
                 religion: religions[Math.floor(Math.random() * religions.length)],
                 type: types[Math.floor(Math.random() * types.length)],
                 statusValue: Math.floor(20 + Math.random() * 70),
@@ -423,10 +458,10 @@ class HyperLifeSimulator {
     }
 
     initiateDating(idx) {
-        if (this.partner) return alert("You are already committed to a primary partner! Break up or start a dark side affair instead.");
+        if (this.partner) return alert("You are already committed to a primary partner! Break up or manage a dark side affair.");
         this.partner = this.marketProfiles[idx];
         this.marketProfiles.splice(idx, 1);
-        this.log(`❤️ New Flame: You started dating ${this.partner.name}. The relationship is currently set to Secret by default.`);
+        this.log(`❤️ New Relationship: You started dating ${this.partner.name}. The status is Secret by default.`);
         this.updateUI();
     }
 
@@ -434,16 +469,13 @@ class HyperLifeSimulator {
         if (!this.partner) return;
         this.partner.secret = !this.partner.secret;
         if (!this.partner.secret) {
-            this.log(`📸 Going Public: Paparazzi spotted you outside a Bandra cafe with ${this.partner.name}. Social media is buzzing!`);
-            this.insta += 4000;
-            // Inter-faith friction engine
+            this.log(`📸 Going Public: Paparazzi spotted you with ${this.partner.name}. Social feeds went wild!`);
+            this.insta += 10000;
             if (this.partner.religion !== this.religion) {
                 this.rep -= 20;
-                this.log(`🚨 Conservative Backlash: Online trolls are targeting you for inter-faith dating (#Boycott Culture active).`);
+                this.log(`🚨 Conservative Backlash: Online trolls target your inter-faith relationship status.`);
             }
-        } else {
-            this.log(`🤫 Private Mode: You requested media accounts to drop images. The relationship is hidden again.`);
-        }
+        } else { this.log(`🤫 Hidden status restored with your partner.`); }
         this.updateUI();
     }
 
@@ -452,12 +484,12 @@ class HyperLifeSimulator {
         if (this.housingIndex < 1) return alert("Your current shared PG apartment is too small for a live-in arrangement!");
         this.partner.liveIn = !this.partner.liveIn;
         if (this.partner.liveIn) {
-            this.log(`🔑 Live-In Triggered: ${this.partner.name} packed bags and moved into your flat. Shared workspace realities commence.`);
-            if (this.religion.includes("Traditional") || this.religion.includes("Conservative")) {
+            this.log(`🔑 Live-In Triggered: ${this.partner.name} moved in with you.`);
+            if (this.religion.includes("Muslim") || this.religion.includes("Hindu")) {
                 this.rep -= 15;
-                this.log(`⚠️ Moral Police Alert: Your traditional family caught rumors of your unmarried live-in status and expressed severe disapproval.`);
+                this.log(`⚠️ Moral Alert: Traditional relatives caught rumors of your unmarried live-in status.`);
             }
-        } else { this.log(`🏠 Separate Roofs: Your partner moved out back into independent lodgings.`); }
+        } else { this.log(`🏠 Separate roofs restored.`); }
         this.updateUI();
     }
 
@@ -466,9 +498,8 @@ class HyperLifeSimulator {
         if (this.money < 8000) return alert("Insufficient cash assets for premium Bandra dates.");
         this.money -= 8000; this.partner.love = Math.min(100, this.partner.love + 20);
         this.energy -= 10;
-        this.log(`🥂 High-End Lounge Date: Spent quality time with ${this.partner.name}. Bond strengthened.`);
+        this.log(`🥂 Luxury Date: Spent high-value time with ${this.partner.name}.`);
         
-        // Unprotected sex check inside core relationships
         if (this.contraceptive === "None" && Math.random() > 0.4) {
             this.triggerPregnancyEngine();
         }
@@ -479,24 +510,24 @@ class HyperLifeSimulator {
         if (!this.partner) return;
         this.log(`💍 Proposal Evaluation: You popped the question to ${this.partner.name}...`);
         
-        // Realistic acceptance matrix (Housing, wealth, rep, love)
-        let proposalScore = (this.partner.love * 0.5) + (this.housingIndex * 15) + (this.money / 20000);
-        if (this.partner.religion !== this.religion) proposalScore -= 25; // Family alignment penalties
+        // Acceptance metrics checking
+        let score = (this.partner.love * 0.5) + (this.housingIndex * 15) + (this.money / 25000);
+        if (this.partner.religion !== this.religion) score -= 25;
 
-        if (proposalScore > 65) {
+        if (score > 65) {
             this.partner.married = true; this.partner.secret = false;
-            this.log(`🎉 YES! ${this.partner.name} accepted your proposal! A high-profile destination wedding is locked.`);
-            this.money -= 150000; this.rep += 15;
+            this.log(`🎉 YES! ${this.partner.name} accepted your proposal! Settle wedding layouts.`);
+            this.money -= 150000; this.rep += 15; this.insta += 25000;
         } else {
             this.sanity -= 30;
-            this.log(`❌ DECLINED: ${this.partner.name} said 'No'. They feel your career/finances are too unstable, or family background adjustments are missing.`);
+            this.log(`❌ DECLINED: ${this.partner.name} said No. They feel your financial tier or cultural background alignment is insufficient.`);
         }
         this.updateUI();
     }
 
     breakup() {
         if (!this.partner) return;
-        this.log(`💔 Dissolution: You broke up with ${this.partner.name}. Personal ties severed.`);
+        this.log(`💔 Dissolution: Broken up with ${this.partner.name}.`);
         this.partner = null; this.sanity -= 20;
         this.updateUI();
     }
@@ -505,56 +536,63 @@ class HyperLifeSimulator {
         if (this.gender === "Male") {
             if (this.partner) {
                 this.log(`🤰 Partner Update: ${this.partner.name} announced she is pregnant with your child!`);
-                if (this.partner.married === false) {
-                    this.rep -= 20; this.log(`🚨 Out of Wedlock Scandal: Tabloids are exposing your upcoming child before marriage.`);
+                if (!this.partner.married) {
+                    this.rep -= 20; this.log(`🚨 Scandal: Tabloids leak updates of an out-of-wedlock child.`);
                 }
             }
             return;
         }
-        if (this.pregnancyDays > 0) return; // Already pregnant
+        if (this.pregnancyDays > 0) return;
         this.pregnancyDays = 1;
-        this.log(`🤰 HEALTH ALERT: You missed your cycle. A rapid pregnancy test confirmed you are PREGNANT.`);
+        this.log(`🤰 HEALTH INCIDENT: A rapid test confirmed you are PREGNANT.`);
     }
 
     triggerAbortion() {
         if (this.pregnancyDays === 0) return;
         this.money -= 25000; this.sanity -= 35; this.energy -= 30;
-        this.log(`🏥 Medical Action: You visited a private clinic in Kokilaben Hospital for a secret abortion. The process was physically draining.`);
+        this.log(`🏥 Medical Case: Underwent a secret clinic abortion to protect your career tracking.`);
         this.pregnancyDays = 0;
         if (Math.random() > 0.85) {
-            this.rep -= 30; this.log(`🚨 Leak: Medical records regarding your abortion were leaked onto Bollywood subreddits. Extreme conservative backlash.`);
+            this.rep -= 30; this.log(`🚨 Expose Leaked: Information regarding your abortion surfaced on Reddit entertainment channels.`);
         }
         this.updateUI();
     }
 
+    executeBrandDeal() {
+        if (!this.isMonetized) return;
+        let payment = Math.floor(this.insta * 0.5);
+        this.money += payment; this.rep = Math.max(10, this.rep - 6);
+        this.log(`💸 Ad Integration: Promoted a luxury brand line on your social profiles. Earned ₹${payment.toLocaleString('en-IN')}.`);
+        this.updateUI();
+    }
+
     findAffair() {
-        const affairTargets = ["Married Blockbuster Producer", "Co-Star Villain Profile", "Lead Casting Director"];
-        this.affair = { name: affairTargets[Math.floor(Math.random() * affairTargets.length)], obsession: 50 };
-        this.log(`🔥 Illicit Sector: You began a dangerous, secret affair with ${this.affair.name}.`);
+        const targets = ["Married A-List Director", "Co-Lead Star Child", "Studio Financing Head"];
+        this.affair = { name: targets[Math.floor(Math.random() * targets.length)], obsession: 50 };
+        this.log(`🔥 Covert Sector: Commenced a dangerous secret affair with a ${this.affair.name}.`);
         this.updateUI();
     }
 
     haveAffairSex() {
         if (!this.affair) return;
         this.affair.obsession = Math.min(100, this.affair.obsession + 15);
-        this.log(`🥵 Backstage Rendezvous: Locked the vanity van door for an intense hookup session with ${this.affair.name}.`);
+        this.log(`🥵 Discreet Hookup: Slipped away into a backstage vanity van with ${this.affair.name}.`);
         
-        // Risk matrix (Contraception + STDs/Pregnancy)
         if (this.contraceptive === "None") {
             if (Math.random() > 0.6) this.triggerPregnancyEngine();
             if (Math.random() > 0.8) {
-                this.illness = { name: "STD Infection", desc: "Reduces base energy recovery by 10% daily until treated." };
-                this.log(`⚠️ Health Complication: You contracted a secret infection due to unprotected sex.`);
+                this.illness = { name: "Reproductive Infection", desc: "-10% daily energy capacities until treated." };
+                this.log(`⚠️ Complication: Contracted a secret physical infection due to unprotected sex.`);
             }
         }
 
-        // Discovery engine
-        let discoveryChance = this.partner ? 0.30 : 0.10;
-        if (Math.random() < discoveryChance) {
-            this.log(`🚨 EXPOSED! Paparazzi caught clear footage of you leaving the hotel space. Your affair is front-page news!`);
+        // Discovery system weights
+        let leakChance = this.partner ? 0.35 : 0.10;
+        if (Math.random() < leakChance) {
+            this.log(`🚨 SPICY EXPOSE: Tabloids leaked clear evidence of your illicit affair!`);
             this.rep -= 50;
             if (this.partner) {
-                this.log(`💔 Scorched Earth: ${this.partner.name} discovered the infidelity and cut you off immediately.`);
+                this.log(`💔 Breakup: Your main partner discovered the affair and walked out immediately.`);
                 this.partner = null;
             }
             this.affair = null;
@@ -565,48 +603,48 @@ class HyperLifeSimulator {
     treatIllness() {
         if (!this.illness) return;
         this.money -= 20000; this.illness = null;
-        this.log(`🏥 Health Cleaned: Paid specialized fees to private clinics. Pathology resolved.`);
+        this.log(`🏥 Medical Clearance: Treatment successful. Body pathology resolved.`);
         this.updateUI();
     }
 
     doRoutine(type) {
         if (type === 'audition') {
             this.money -= 200; this.energy -= 15;
-            this.log(`🚇 Commuted via Western Line locals. Handed composite cards to creative teams.`);
+            this.log(`🚇 Commuted via Western Line auto-rickshaws to Aram Nagar production blocks.`);
         } else if (type === 'gym') {
             this.money -= 400; this.energy -= 20; this.looks += 2;
-            this.log(`🏋️ Trained under celebrity workout programs. Aesthetic metrics adjusted.`);
+            this.log(`🏋️ Performed physical training transformations. Aesthetics increased.`);
         } else if (type === 'rest') {
             this.energy = Math.min(100, this.energy + 35); this.sanity = Math.min(100, this.sanity + 10);
-            this.log(`🛌 Rest Period: Ordered diet configurations from Swiggy and recovered your system.`);
+            this.log(`🛌 Rest Stage: Recovered body baselines using Swiggy diet orders.`);
         }
         this.tickDay();
     }
 
     giveAudition(idx) {
         const aud = this.availableAuditions[idx];
-        if (this.currentProject) return alert("You are already under a running shoot schedule.");
+        if (this.currentProject) return alert("You are already active under a film shooting calendar schedule!");
         
-        let passValue = 35 + (this.skill - aud.reqSkill) + (this.looks * 0.2);
-        if (this.pregnancyDays > 120) passValue -= 40; // Pregnancy visibly impacts casting selections
+        let successChance = 35 + (this.skill - aud.reqSkill) + (this.looks * 0.2);
+        if (this.pregnancyDays > 120) successChance -= 40; // Visible bodily updates affect casting selections
 
-        if (Math.random() * 100 < Math.max(5, passValue)) {
+        if (Math.random() * 100 < Math.max(5, successChance)) {
             this.currentProject = { ...aud, timeLeft: aud.duration };
-            this.log(`🎉 Role Secured! Landed contract for "${aud.title}". Filming begins.`);
+            this.log(`🎉 Role Win! Secured active assignment for "${aud.title}". Filming begins.`);
             this.availableAuditions.splice(idx, 1);
         } else {
-            this.log(`❌ Rejected: Casting board felt your profile didn't align with their target market.`);
+            this.log(`❌ Rejected: Casting boards passed on your test clip.`);
             this.sanity -= 5;
         }
         this.tickDay();
     }
 
     upgradeHousing() {
-        if (this.housingIndex >= HOUSING_LIST.length - 1) return;
+        if (this.housingIndex >= HOUSING_LIST.length - 1) return alert("Holding peak real estate assets.");
         let target = HOUSING_LIST[this.housingIndex + 1];
-        if (this.money < target.rent * 2) return alert("Insufficient savings for booking deposits.");
+        if (this.money < target.rent * 2) return alert("Insufficient liquid savings for booking security deposits.");
         this.housingIndex++;
-        this.log(`🏢 Moved Flat: Upgraded living parameters to ${target.name}.`);
+        this.log(`🏢 Flat Relocation: Moved into ${target.name}.`);
         this.updateUI();
     }
 
@@ -618,17 +656,16 @@ class HyperLifeSimulator {
     tickDay() {
         this.day += 1;
 
-        // Pregnancy Progression Counter
+        // Pregnancy progressions
         if (this.pregnancyDays > 0) {
-            this.pregnancyDays += 3; // Speeds up days for pacing balance
-            this.energy -= 4;        // Constant physiological tax
-            
-            if (this.pregnancyDays >= 270) { // 9 Months complete
+            this.pregnancyDays += 3;
+            this.energy -= 4;
+            if (this.pregnancyDays >= 270) {
                 if (this.gender === "Female") {
                     this.children += 1;
-                    this.log(`👶 BIRTH ACCLAIM! You successfully delivered a healthy child at Lilavati Hospital!`);
+                    this.log(`👶 BIRTH ACCLAIM: You delivered a child safely at a private hospital in Juhu!`);
                     if (this.currentProject) {
-                        this.log(`🚫 Production Penalty: You missed consecutive shoot dates due to delivery; producers filed a breach clause.`);
+                        this.log(`🚫 Project Termination: Missed filming calendars due to child birth; producers terminated the contract.`);
                         this.currentProject = null;
                     }
                 }
@@ -636,32 +673,37 @@ class HyperLifeSimulator {
             }
         }
 
-        // System Illness engine checks
+        // Random Illness vectors
         if (!this.illness && Math.random() > 0.96) {
-            const diseasePool = [
-                { name: "Dengue Fever", desc: "-20% Energy limits per day." },
-                { name: "Severe Throat Infection", desc: "Cannot audition or deliver lines for 10 days." }
-            ];
-            this.illness = diseasePool[Math.floor(Math.random() * diseasePool.length)];
-            this.log(`🚨 MEDICAL DIAGNOSIS: You caught ${this.illness.name}! Check your health status panels.`);
+            this.illness = { name: "Dengue Fever / Fatigue crisis", desc: "-15% energy metrics per turn cycle." };
+            this.log(`🚨 HEALTH ALERT: Medical diagnosis confirmed you caught ${this.illness.name}.`);
         }
 
-        // Project schedule progression
+        // Project tracker steps
         if (this.currentProject && this.day % 10 === 0) {
             this.currentProject.timeLeft -= 1;
             if (this.currentProject.timeLeft <= 0) {
                 this.money += this.currentProject.pay; this.insta += this.currentProject.fame;
-                this.log(`🎬 Wrap Film! Finished "${this.currentProject.title}". Check paid balance: +₹${this.currentProject.pay.toLocaleString('en-IN')}`);
+                this.log(`🎬 Schedule Wrap! Paid contract completed for "${this.currentProject.title}". Distributed: +₹${this.currentProject.pay.toLocaleString('en-IN')}`);
                 this.currentProject = null;
             }
         }
 
-        // Monthly billing loops
+        // Monthly accounting parameters
         if (this.day > 30) {
             this.day = 1; this.month += 1;
-            let charges = HOUSING_LIST[this.housingIndex].rent + (this.children * 10000);
-            this.money -= charges;
-            this.log(`📅 Monthly Bills: Charged rent & kid maintenance layouts totaling: ₹${charges.toLocaleString('en-IN')}`);
+            let costs = HOUSING_LIST[this.housingIndex].rent + (this.children * 12000);
+            this.money -= costs;
+            this.log(`📅 Bills Summary: Paid rent & family upkeep charges totaling: ₹${costs.toLocaleString('en-IN')}`);
+            
+            // Monetized active payout lines
+            if (this.isMonetized) {
+                let passiveRev = Math.floor(this.insta * 0.08);
+                this.money += passiveRev;
+                this.log(`📈 Social Monetization: Collected passive distribution income of ₹${passiveRev.toLocaleString('en-IN')}`);
+            }
+
+            if (this.partner) this.partner.love = Math.max(0, this.partner.love - 6);
             this.generateDatingMarket();
             this.generateAuditions();
         }
@@ -672,7 +714,7 @@ class HyperLifeSimulator {
 
 let game;
 function startGame() {
-    game = new HyperLifeSimulator(
+    game = new CompleteActorSimulator(
         document.getElementById('p-name').value,
         document.getElementById('p-gender').value,
         document.getElementById('p-religion').value,
@@ -685,3 +727,4 @@ function startGame() {
 </script>
 </body>
 </html>
+              
