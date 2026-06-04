@@ -1,1 +1,687 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mumbai Dreams: The Complete Life Simulator</title>
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --maroon: #4a0612;
+            --card-bg: #1a0b0e;
+            --dark-bg: #0a0304;
+            --text: #ffffff;
+            --text-muted: #cfb4b9;
+            --scandal: #ff3333;
+            --green: #2ecc71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+        }
+
+        .container { max-width: 1350px; margin: 0 auto; }
+
+        /* Setup */
+        #creation-screen {
+            background: var(--card-bg);
+            border: 2px solid var(--gold);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; color: var(--gold); font-weight: bold; font-size: 0.9rem; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 8px; background: #000; color: white; border: 1px solid #444; border-radius: 4px;
+        }
+
+        #game-screen { display: none; }
+        header { text-align: center; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
+        h1 { margin: 0; color: var(--gold); font-size: 2rem; }
+
+        /* Grids */
+        .main-layout { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; }
+        @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #361016;
+            margin-bottom: 15px;
+        }
+        h2 { margin-top: 0; color: var(--gold); font-size: 1.1rem; border-bottom: 1px solid #361016; padding-bottom: 4px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 15px; }
+        .stat-card { background: #240e11; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #4f141d; }
+        .stat-card h3 { margin: 0; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-card p { margin: 2px 0 0 0; font-size: 1rem; font-weight: bold; color: var(--gold); }
+
+        /* UI elements */
+        .btn {
+            background: #33050c; color: white; border: 1px solid var(--gold);
+            padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
+            width: 100%; margin-bottom: 6px; font-size: 0.8rem; text-align: left;
+        }
+        .btn:hover { background: #4d0b16; }
+        .btn-gold { background: var(--gold); color: black; border: 1px solid #000; text-align: center; }
+        .btn-gold:hover { background: #ffe066; }
+        .btn-danger { background: #730a11; border: 1px solid var(--scandal); }
+
+        .card { background: #0d0405; border: 1px solid #3d141b; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; }
+        #log { height: 220px; overflow-y: auto; background: #050102; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 0.8rem; }
+        .log-entry { margin-bottom: 4px; border-left: 3px solid var(--gold); padding-left: 6px; }
+        
+        .badge { display: inline-block; padding: 2px 5px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; margin-top: 3px; }
+        .badge-scandal { background: var(--scandal); color: white; }
+        .badge-safe { background: var(--green); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- SETUP SCREEN -->
+    <div id="creation-screen">
+        <h2 style="text-align: center; border:none;">Mumbai Talent Registry</h2>
+        <div class="form-group"><label>Screen Name</label><input type="text" id="p-name" value="Zoya Khan"></div>
+        <div class="form-group">
+            <label>Gender</label>
+            <select id="p-gender" onchange="toggleGenderSpecifics()"><option value="Female">Female</option><option value="Male">Male</option></select>
+        </div>
+        <div class="form-group">
+            <label>Religion & Cultural Values</label>
+            <select id="p-religion">
+                <option value="Muslim (Orthodox/Conservative)">Muslim (Traditional/Conservative)</option>
+                <option value="Hindu (Traditional/Vegetarian)">Hindu (Traditional/Vegetarian)</option>
+                <option value="Christian (Goan/Anglo)">Christian (Goan/Anglo)</option>
+                <option value="Sikh (Punjabi Roots)">Sikh (Punjabi Roots)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Home Region</label>
+            <select id="p-region"><option value="Delhi">Delhi NCR</option><option value="Mumbai">Mumbai</option><option value="Punjab">Punjab</option><option value="Kerala">Kerala</option></select>
+        </div>
+        <button class="btn btn-gold" style="margin-top:10px;" onclick="startGame()">Step Into Versova Casting Hub 🚕</button>
+    </div>
+
+    <!-- MAIN GAME INTERFACE -->
+    <div id="game-screen">
+        <header>
+            <h1 id="display-name">Actor</h1>
+            <p id="display-bio">Bio</p>
+            <div style="color:var(--gold); font-weight:bold; font-size:0.9rem; margin-top:3px;" id="display-date">Day 1 | Month 1</div>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card"><h3>Bank Assets</h3><p id="stat-money">₹30,000</p></div>
+            <div class="stat-card"><h3>Energy</h3><p id="stat-energy">100%</p></div>
+            <div class="stat-card"><h3>Mental Health</h3><p id="stat-sanity">100%</p></div>
+            <div class="stat-card"><h3>Acting Skill</h3><p id="stat-skill">10</p></div>
+            <div class="stat-card"><h3>Looks / Aesthetic</h3><p id="stat-looks">40</p></div>
+            <div class="stat-card"><h3>Public Rep</h3><p id="stat-rep">75%</p></div>
+        </div>
+
+        <div class="main-layout">
+            
+            <!-- COLUMN 1: WARDROBE, ROUTINE & HEALTH -->
+            <div>
+                <div class="panel">
+                    <h2>Dressing & Aesthetics</h2>
+                    <div class="card">Current Style: <span id="current-dress-label" style="font-weight:bold; color:var(--gold);">Traditional Kurti</span></div>
+                    <select id="select-dress" class="form-group" style="background:#000; color:white; width:100%; padding:5px;" onchange="game.changeDress()">
+                        <option value="Traditional">Traditional Sanskari Indian Wear (+15% Rep, -5 Looks)</option>
+                        <option value="Casual">Casual Western Jeans & Tee (Neutral)</option>
+                        <option value="Bold">Bold Designer/Revealing Gown (-15% Rep, +25 Looks)</option>
+                    </select>
+                </div>
+
+                <div class="panel">
+                    <h2>Daily Upkeep & Routines</h2>
+                    <button class="btn" onclick="game.doRoutine('audition')">🏃 Commute to Aram Nagar Auditions (-₹200)</button>
+                    <button class="btn" onclick="game.doRoutine('gym')">🏋️ Gym Workout & Aesthetic Prep (-₹400)</button>
+                    <button class="btn" onclick="game.doRoutine('rest')">🛌 Rest, Eat Clean & Hydrate (+Energy)</button>
+                </div>
+
+                <div class="panel">
+                    <h2>Medical Log & Illness</h2>
+                    <div id="health-status-box" class="card">Health: Perfect Body Condition</div>
+                    <button class="btn btn-danger" id="btn-treat-illness" style="display:none;" onclick="game.treatIllness()">Pay for Specialist Medical Treatment</button>
+                </div>
+
+                <div class="panel">
+                    <h2>Housing Status</h2>
+                    <div id="housing-box" class="card">1BHK Shared PG</div>
+                    <button class="btn btn-gold" onclick="game.upgradeHousing()">Move to Better Flat</button>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: THE PRIVATE LIFE SUITE (DATING & KIDS) -->
+            <div>
+                <div class="panel">
+                    <h2>Primary Romantic Life</h2>
+                    <div id="relationship-box" class="card">Status: Single</div>
+                    
+                    <div id="relationship-controls" style="display:none;">
+                        <button class="btn" onclick="game.toggleRelationshipStatus()">Toggle Privacy (Secret / Public)</button>
+                        <button class="btn" onclick="game.toggleLiveIn()">Toggle Living Status (Live-in / Separate)</button>
+                        <button class="btn" onclick="game.datePartner()">Go on an Expensive Date (-₹8,000)</button>
+                        <button class="btn btn-gold" onclick="game.proposeMarriage()">💍 Propose Marriage</button>
+                        <button class="btn btn-danger" onclick="game.breakup()">💔 Break Up Immediately</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Sexual Health & Contraceptives</h2>
+                    <div class="card">Active Guard: <span id="contraceptive-label" style="font-weight:bold; color:var(--green);">None</span></div>
+                    <select id="select-contraceptive" class="form-group" style="background:#000; color:white; width:100%; padding:5px;" onchange="game.changeContraceptive()">
+                        <option value="None">No Protection (High pregnancy chance, risk of STDs)</option>
+                        <option value="Condoms">Use Condoms (-₹100/day, Safe)</option>
+                        <option value="Pills">Contraceptive Pills / IUD (-₹500/mo, Minor Energy Drop)</option>
+                    </select>
+                </div>
+
+                <div class="panel" id="pregnancy-panel">
+                    <h2>Reproduction, Pregnancy & Kids</h2>
+                    <div id="pregnancy-box" class="card">No Active Reproductive Updates</div>
+                    <div id="pregnancy-controls" style="display:none;">
+                        <button class="btn btn-danger" id="btn-abortion" onclick="game.triggerAbortion()">Undergo Secret Abortion (-₹25,000, -Sanity)</button>
+                    </div>
+                    <div id="children-box" class="card" style="margin-top:5px; display:none;">Kids: None</div>
+                </div>
+
+                <div class="panel">
+                    <h2>Local Dating Market (Available Profiles)</h2>
+                    <div id="dating-market-box"></div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: PROFESSION, DARK SECTOR & TICKER -->
+            <div>
+                <div class="panel">
+                    <h2>Active Professional Contract</h2>
+                    <div id="current-project-box" class="card">Funemployed.</div>
+                    <div id="auditions-box"></div>
+                </div>
+
+                <div class="panel" style="border: 1px solid var(--scandal);">
+                    <h2 style="color:var(--scandal);">Secret Affairs (The Dark Side)</h2>
+                    <div id="affair-box" class="card" style="border-color:#4a0612;">No ongoing secret affairs.</div>
+                    <button class="btn btn-danger" onclick="game.findAffair()">Target a Married Producer/Co-Star for an Affair</button>
+                    <button class="btn btn-danger" id="btn-affair-sex" style="display:none;" onclick="game.haveAffairSex()">Sneak into Vanity Van for Secret Sex</button>
+                </div>
+
+                <div class="panel">
+                    <h2>Awards Cabinet</h2>
+                    <div id="awards-box" style="font-size:0.8rem; color:var(--text-muted);">None</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Ticker -->
+        <div class="panel">
+            <h2>Bollywood Radar (Tabloid Machine & WhatsApp Blinds)</h2>
+            <div id="log"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Database Assets
+const HOUSING_LIST = [
+    { name: "1BHK Shared PG (Andheri West)", rent: 12000, profileChance: 1.0 },
+    { name: "Boutique 1BHK Flat (Goregaon East)", rent: 35000, profileChance: 1.5 },
+    { name: "Luxury Highrise (Bandra West)", rent: 110000, profileChance: 3.0 },
+    { name: "Sea-facing Penthouse (Juhu)", rent: 400000, profileChance: 6.0 }
+];
+
+const CASTING_CALLS = [
+    { title: "Crime Thriller Web-Series", reqSkill: 15, reqLooks: 20, pay: 80000, duration: 4, fame: 50 },
+    { title: "Balaji Telefilms Lead Role", reqSkill: 30, reqLooks: 45, pay: 250000, duration: 6, fame: 300 },
+    { title: "Pan-India Action Blockbuster", reqSkill: 60, reqLooks: 75, pay: 5000000, duration: 8, fame: 4000 }
+];
+
+class HyperLifeSimulator {
+    constructor(name, gender, religion, region) {
+        this.name = name; this.gender = gender; this.religion = religion; this.region = region;
+        this.money = 30000; this.energy = 100; this.sanity = 100; this.skill = 10; this.looks = 40; this.rep = 75;
+        this.day = 1; this.month = 1; this.insta = 1500;
+
+        // Life Variables
+        this.dress = "Casual";
+        this.contraceptive = "None";
+        this.illness = null;
+        this.housingIndex = 0;
+        
+        this.partner = null;       // Main Relationship
+        this.affair = null;        // Illicit Affair
+        this.pregnancyDays = 0;    // Pregnancy tracking counter
+        this.children = 0;
+        this.currentProject = null;
+        this.awards = [];
+        this.availableAuditions = [];
+        this.marketProfiles = [];
+    }
+
+    init() {
+        document.getElementById('display-name').innerText = this.name;
+        document.getElementById('display-bio').innerText = `${this.gender} | ${this.religion} | From ${this.region}`;
+        this.generateAuditions();
+        this.generateDatingMarket();
+        this.updateUI();
+        this.log(`📍 Landed in Mumbai. You adjusted your dress to ${this.dress} style. The hustle begins.`);
+    }
+
+    updateUI() {
+        // Safe limits
+        this.energy = Math.max(0, Math.min(100, this.energy));
+        this.sanity = Math.max(0, Math.min(100, this.sanity));
+        this.rep = Math.max(0, Math.min(100, this.rep));
+
+        document.getElementById('stat-money').innerText = `₹${this.money.toLocaleString('en-IN')}`;
+        document.getElementById('stat-energy').innerText = `${this.energy}%`;
+        document.getElementById('stat-sanity').innerText = `${this.sanity}%`;
+        document.getElementById('stat-skill').innerText = this.skill;
+        document.getElementById('stat-looks').innerText = this.looks;
+        document.getElementById('stat-rep').innerText = `${this.rep}%`;
+        document.getElementById('display-date').innerText = `Day ${this.day} | Month ${this.month}`;
+        document.getElementById('current-dress-label').innerText = this.dress;
+        document.getElementById('contraceptive-label').innerText = this.contraceptive;
+
+        // Illness layout
+        const hBox = document.getElementById('health-status-box');
+        const hBtn = document.getElementById('btn-treat-illness');
+        if (this.illness) {
+            hBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">⚠️ Illness: ${this.illness.name}</span><br><small>Effects: ${this.illness.desc}</small>`;
+            hBtn.style.display = 'block';
+        } else {
+            hBox.innerText = "Health: Balanced, No physical pathologies.";
+            hBtn.style.display = 'none';
+        }
+
+        // Housing Panel
+        document.getElementById('housing-box').innerHTML = `<strong>Unit:</strong> ${HOUSING_LIST[this.housingIndex].name}<br><small>Rent: ₹${HOUSING_LIST[this.housingIndex].rent.toLocaleString('en-IN')}/mo</small>`;
+
+        // Main Relationship UI Management
+        const rBox = document.getElementById('relationship-box');
+        const rControls = document.getElementById('relationship-controls');
+        if (this.partner) {
+            rBox.innerHTML = `
+                <strong>Partner:</strong> ${this.partner.name} (${this.partner.religion})<br>
+                <small>Type: ${this.partner.type} | Love Level: ${this.partner.love}%</small><br>
+                <span class="badge ${this.partner.secret ? 'badge-scandal' : 'badge-safe'}">${this.partner.secret ? 'Secret Status' : 'Public/Aesthetic Couple'}</span>
+                <span class="badge ${this.partner.liveIn ? 'badge-scandal' : 'badge-safe'}">${this.partner.liveIn ? 'Live-In Arrangement' : 'Living Separately'}</span>
+                ${this.partner.married ? '<br><span class="badge badge-safe">💍 Legally Married</span>' : ''}
+            `;
+            rControls.style.display = 'block';
+        } else {
+            rBox.innerText = "Status: Single & Independent";
+            rControls.style.display = 'none';
+        }
+
+        // Affair UI Management
+        const affBox = document.getElementById('affair-box');
+        const affSexBtn = document.getElementById('btn-affair-sex');
+        if (this.affair) {
+            affBox.innerHTML = `<strong>Secret Affair:</strong> ${this.affair.name}<br><small>Obsession index: ${this.affair.obsession}%</small>`;
+            affSexBtn.style.display = 'block';
+        } else {
+            affBox.innerText = "No toxic workplace affairs developing.";
+            affSexBtn.style.display = 'none';
+        }
+
+        // Reproductive Framework UI
+        const pregBox = document.getElementById('pregnancy-box');
+        const pregCtrl = document.getElementById('pregnancy-controls');
+        const kidBox = document.getElementById('children-box');
+        if (this.pregnancyDays > 0) {
+            pregBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🤰 PREGNANT (${Math.floor(this.pregnancyDays / 10)} Weeks)</span><br><small>Energy draining faster. Noticeable physical profile change.</small>`;
+            pregCtrl.style.display = 'block';
+        } else {
+            pregBox.innerText = "No active reproductive developments.";
+            pregCtrl.style.display = 'none';
+        }
+        if (this.children > 0) {
+            kidBox.style.display = 'block';
+            kidBox.innerHTML = `👶 Children Raised: ${this.children} (Passive monthly maintenance overhead)`;
+        } else { kidBox.style.display = 'none'; }
+
+        // Render Local Dating Market Profiles
+        const mBox = document.getElementById('dating-market-box'); mBox.innerHTML = '';
+        this.marketProfiles.forEach((prof, idx) => {
+            mBox.innerHTML += `
+                <div class="card">
+                    <strong>${prof.name}</strong> (${prof.religion})<br>
+                    <small>Profile: ${prof.type} | Acceptability Index: ${prof.statusValue}</small><br>
+                    <button class="btn btn-gold" style="margin-top:4px; padding:2px; font-size:0.7rem;" onclick="game.initiateDating(${idx})">Ask Out / Pursue</button>
+                </div>`;
+        });
+
+        // Professional System Rendering
+        const pBox = document.getElementById('current-project-box');
+        if (this.currentProject) {
+            pBox.innerHTML = `<strong>Shooting: ${this.currentProject.title}</strong><br><small>Months Left: ${this.currentProject.timeLeft}</small>`;
+        } else { pBox.innerText = "No running shoot contracts. Submit tapes below:"; }
+
+        const audBox = document.getElementById('auditions-box'); audBox.innerHTML = '';
+        this.availableAuditions.forEach((aud, idx) => {
+            audBox.innerHTML += `
+                <div class="card" style="border-color:var(--gold);">
+                    <strong>${aud.title}</strong><br><small>Pay: ₹${aud.pay.toLocaleString('en-IN')} | Req Skill: ${aud.reqSkill}</small>
+                    <button class="btn" style="margin-top:4px; padding:2px;" onclick="game.giveAudition(${idx})">Give Screen Test</button>
+                </div>`;
+        });
+
+        const awBox = document.getElementById('awards-box');
+        awBox.innerHTML = this.awards.length > 0 ? this.awards.map(a => `🏆 ${a}`).join('<br>') : "No awards on shelf.";
+    }
+
+    log(m) {
+        const lb = document.getElementById('log');
+        lb.innerHTML = `<div class="log-entry">${m}</div>` + lb.innerHTML;
+    }
+
+    changeDress() {
+        this.dress = document.getElementById('select-dress').value;
+        this.log(`👗 Wardrobe Adjusted: You shifted your public profile look to ${this.dress}. Aesthetics updated.`);
+        if (this.dress === "Bold") { this.looks += 20; this.rep -= 15; }
+        if (this.dress === "Traditional") { this.looks -= 5; this.rep += 15; }
+        this.updateUI();
+    }
+
+    changeContraceptive() {
+        this.contraceptive = document.getElementById('select-contraceptive').value;
+        this.log(`💊 Protection Protocol: Switched to ${this.contraceptive}. Risk profiles modified.`);
+        this.updateUI();
+    }
+
+    generateDatingMarket() {
+        this.marketProfiles = [];
+        const poolNames = ["Aarav Sharma", "Zayn Malik", "Rohan Kapoor", "Ananya Pandey", "Meera Iyer", "Sania Sheikh"];
+        const religions = ["Hindu (Traditional/Vegetarian)", "Muslim (Traditional/Conservative)", "Christian (Goan/Anglo)", "Sikh (Punjabi Roots)"];
+        const types = ["Struggling Model", "Nepo-Kid Influencer", "Indie Film Director", "Bandra Corporate Elite"];
+        
+        for (let i = 0; i < 3; i++) {
+            this.marketProfiles.push({
+                name: poolNames[Math.floor(Math.random() * poolNames.length)] + " " + (i+1),
+                religion: religions[Math.floor(Math.random() * religions.length)],
+                type: types[Math.floor(Math.random() * types.length)],
+                statusValue: Math.floor(20 + Math.random() * 70),
+                love: 45, secret: true, liveIn: false, married: false
+            });
+        }
+    }
+
+    initiateDating(idx) {
+        if (this.partner) return alert("You are already committed to a primary partner! Break up or start a dark side affair instead.");
+        this.partner = this.marketProfiles[idx];
+        this.marketProfiles.splice(idx, 1);
+        this.log(`❤️ New Flame: You started dating ${this.partner.name}. The relationship is currently set to Secret by default.`);
+        this.updateUI();
+    }
+
+    toggleRelationshipStatus() {
+        if (!this.partner) return;
+        this.partner.secret = !this.partner.secret;
+        if (!this.partner.secret) {
+            this.log(`📸 Going Public: Paparazzi spotted you outside a Bandra cafe with ${this.partner.name}. Social media is buzzing!`);
+            this.insta += 4000;
+            // Inter-faith friction engine
+            if (this.partner.religion !== this.religion) {
+                this.rep -= 20;
+                this.log(`🚨 Conservative Backlash: Online trolls are targeting you for inter-faith dating (#Boycott Culture active).`);
+            }
+        } else {
+            this.log(`🤫 Private Mode: You requested media accounts to drop images. The relationship is hidden again.`);
+        }
+        this.updateUI();
+    }
+
+    toggleLiveIn() {
+        if (!this.partner) return;
+        if (this.housingIndex < 1) return alert("Your current shared PG apartment is too small for a live-in arrangement!");
+        this.partner.liveIn = !this.partner.liveIn;
+        if (this.partner.liveIn) {
+            this.log(`🔑 Live-In Triggered: ${this.partner.name} packed bags and moved into your flat. Shared workspace realities commence.`);
+            if (this.religion.includes("Traditional") || this.religion.includes("Conservative")) {
+                this.rep -= 15;
+                this.log(`⚠️ Moral Police Alert: Your traditional family caught rumors of your unmarried live-in status and expressed severe disapproval.`);
+            }
+        } else { this.log(`🏠 Separate Roofs: Your partner moved out back into independent lodgings.`); }
+        this.updateUI();
+    }
+
+    datePartner() {
+        if (!this.partner) return;
+        if (this.money < 8000) return alert("Insufficient cash assets for premium Bandra dates.");
+        this.money -= 8000; this.partner.love = Math.min(100, this.partner.love + 20);
+        this.energy -= 10;
+        this.log(`🥂 High-End Lounge Date: Spent quality time with ${this.partner.name}. Bond strengthened.`);
+        
+        // Unprotected sex check inside core relationships
+        if (this.contraceptive === "None" && Math.random() > 0.4) {
+            this.triggerPregnancyEngine();
+        }
+        this.updateUI();
+    }
+
+    proposeMarriage() {
+        if (!this.partner) return;
+        this.log(`💍 Proposal Evaluation: You popped the question to ${this.partner.name}...`);
+        
+        // Realistic acceptance matrix (Housing, wealth, rep, love)
+        let proposalScore = (this.partner.love * 0.5) + (this.housingIndex * 15) + (this.money / 20000);
+        if (this.partner.religion !== this.religion) proposalScore -= 25; // Family alignment penalties
+
+        if (proposalScore > 65) {
+            this.partner.married = true; this.partner.secret = false;
+            this.log(`🎉 YES! ${this.partner.name} accepted your proposal! A high-profile destination wedding is locked.`);
+            this.money -= 150000; this.rep += 15;
+        } else {
+            this.sanity -= 30;
+            this.log(`❌ DECLINED: ${this.partner.name} said 'No'. They feel your career/finances are too unstable, or family background adjustments are missing.`);
+        }
+        this.updateUI();
+    }
+
+    breakup() {
+        if (!this.partner) return;
+        this.log(`💔 Dissolution: You broke up with ${this.partner.name}. Personal ties severed.`);
+        this.partner = null; this.sanity -= 20;
+        this.updateUI();
+    }
+
+    triggerPregnancyEngine() {
+        if (this.gender === "Male") {
+            if (this.partner) {
+                this.log(`🤰 Partner Update: ${this.partner.name} announced she is pregnant with your child!`);
+                if (this.partner.married === false) {
+                    this.rep -= 20; this.log(`🚨 Out of Wedlock Scandal: Tabloids are exposing your upcoming child before marriage.`);
+                }
+            }
+            return;
+        }
+        if (this.pregnancyDays > 0) return; // Already pregnant
+        this.pregnancyDays = 1;
+        this.log(`🤰 HEALTH ALERT: You missed your cycle. A rapid pregnancy test confirmed you are PREGNANT.`);
+    }
+
+    triggerAbortion() {
+        if (this.pregnancyDays === 0) return;
+        this.money -= 25000; this.sanity -= 35; this.energy -= 30;
+        this.log(`🏥 Medical Action: You visited a private clinic in Kokilaben Hospital for a secret abortion. The process was physically draining.`);
+        this.pregnancyDays = 0;
+        if (Math.random() > 0.85) {
+            this.rep -= 30; this.log(`🚨 Leak: Medical records regarding your abortion were leaked onto Bollywood subreddits. Extreme conservative backlash.`);
+        }
+        this.updateUI();
+    }
+
+    findAffair() {
+        const affairTargets = ["Married Blockbuster Producer", "Co-Star Villain Profile", "Lead Casting Director"];
+        this.affair = { name: affairTargets[Math.floor(Math.random() * affairTargets.length)], obsession: 50 };
+        this.log(`🔥 Illicit Sector: You began a dangerous, secret affair with ${this.affair.name}.`);
+        this.updateUI();
+    }
+
+    haveAffairSex() {
+        if (!this.affair) return;
+        this.affair.obsession = Math.min(100, this.affair.obsession + 15);
+        this.log(`🥵 Backstage Rendezvous: Locked the vanity van door for an intense hookup session with ${this.affair.name}.`);
+        
+        // Risk matrix (Contraception + STDs/Pregnancy)
+        if (this.contraceptive === "None") {
+            if (Math.random() > 0.6) this.triggerPregnancyEngine();
+            if (Math.random() > 0.8) {
+                this.illness = { name: "STD Infection", desc: "Reduces base energy recovery by 10% daily until treated." };
+                this.log(`⚠️ Health Complication: You contracted a secret infection due to unprotected sex.`);
+            }
+        }
+
+        // Discovery engine
+        let discoveryChance = this.partner ? 0.30 : 0.10;
+        if (Math.random() < discoveryChance) {
+            this.log(`🚨 EXPOSED! Paparazzi caught clear footage of you leaving the hotel space. Your affair is front-page news!`);
+            this.rep -= 50;
+            if (this.partner) {
+                this.log(`💔 Scorched Earth: ${this.partner.name} discovered the infidelity and cut you off immediately.`);
+                this.partner = null;
+            }
+            this.affair = null;
+        }
+        this.tickDay();
+    }
+
+    treatIllness() {
+        if (!this.illness) return;
+        this.money -= 20000; this.illness = null;
+        this.log(`🏥 Health Cleaned: Paid specialized fees to private clinics. Pathology resolved.`);
+        this.updateUI();
+    }
+
+    doRoutine(type) {
+        if (type === 'audition') {
+            this.money -= 200; this.energy -= 15;
+            this.log(`🚇 Commuted via Western Line locals. Handed composite cards to creative teams.`);
+        } else if (type === 'gym') {
+            this.money -= 400; this.energy -= 20; this.looks += 2;
+            this.log(`🏋️ Trained under celebrity workout programs. Aesthetic metrics adjusted.`);
+        } else if (type === 'rest') {
+            this.energy = Math.min(100, this.energy + 35); this.sanity = Math.min(100, this.sanity + 10);
+            this.log(`🛌 Rest Period: Ordered diet configurations from Swiggy and recovered your system.`);
+        }
+        this.tickDay();
+    }
+
+    giveAudition(idx) {
+        const aud = this.availableAuditions[idx];
+        if (this.currentProject) return alert("You are already under a running shoot schedule.");
+        
+        let passValue = 35 + (this.skill - aud.reqSkill) + (this.looks * 0.2);
+        if (this.pregnancyDays > 120) passValue -= 40; // Pregnancy visibly impacts casting selections
+
+        if (Math.random() * 100 < Math.max(5, passValue)) {
+            this.currentProject = { ...aud, timeLeft: aud.duration };
+            this.log(`🎉 Role Secured! Landed contract for "${aud.title}". Filming begins.`);
+            this.availableAuditions.splice(idx, 1);
+        } else {
+            this.log(`❌ Rejected: Casting board felt your profile didn't align with their target market.`);
+            this.sanity -= 5;
+        }
+        this.tickDay();
+    }
+
+    upgradeHousing() {
+        if (this.housingIndex >= HOUSING_LIST.length - 1) return;
+        let target = HOUSING_LIST[this.housingIndex + 1];
+        if (this.money < target.rent * 2) return alert("Insufficient savings for booking deposits.");
+        this.housingIndex++;
+        this.log(`🏢 Moved Flat: Upgraded living parameters to ${target.name}.`);
+        this.updateUI();
+    }
+
+    generateAuditions() {
+        this.availableAuditions = [];
+        CASTING_CALLS.forEach(c => this.availableAuditions.push({...c}));
+    }
+
+    tickDay() {
+        this.day += 1;
+
+        // Pregnancy Progression Counter
+        if (this.pregnancyDays > 0) {
+            this.pregnancyDays += 3; // Speeds up days for pacing balance
+            this.energy -= 4;        // Constant physiological tax
+            
+            if (this.pregnancyDays >= 270) { // 9 Months complete
+                if (this.gender === "Female") {
+                    this.children += 1;
+                    this.log(`👶 BIRTH ACCLAIM! You successfully delivered a healthy child at Lilavati Hospital!`);
+                    if (this.currentProject) {
+                        this.log(`🚫 Production Penalty: You missed consecutive shoot dates due to delivery; producers filed a breach clause.`);
+                        this.currentProject = null;
+                    }
+                }
+                this.pregnancyDays = 0;
+            }
+        }
+
+        // System Illness engine checks
+        if (!this.illness && Math.random() > 0.96) {
+            const diseasePool = [
+                { name: "Dengue Fever", desc: "-20% Energy limits per day." },
+                { name: "Severe Throat Infection", desc: "Cannot audition or deliver lines for 10 days." }
+            ];
+            this.illness = diseasePool[Math.floor(Math.random() * diseasePool.length)];
+            this.log(`🚨 MEDICAL DIAGNOSIS: You caught ${this.illness.name}! Check your health status panels.`);
+        }
+
+        // Project schedule progression
+        if (this.currentProject && this.day % 10 === 0) {
+            this.currentProject.timeLeft -= 1;
+            if (this.currentProject.timeLeft <= 0) {
+                this.money += this.currentProject.pay; this.insta += this.currentProject.fame;
+                this.log(`🎬 Wrap Film! Finished "${this.currentProject.title}". Check paid balance: +₹${this.currentProject.pay.toLocaleString('en-IN')}`);
+                this.currentProject = null;
+            }
+        }
+
+        // Monthly billing loops
+        if (this.day > 30) {
+            this.day = 1; this.month += 1;
+            let charges = HOUSING_LIST[this.housingIndex].rent + (this.children * 10000);
+            this.money -= charges;
+            this.log(`📅 Monthly Bills: Charged rent & kid maintenance layouts totaling: ₹${charges.toLocaleString('en-IN')}`);
+            this.generateDatingMarket();
+            this.generateAuditions();
+        }
+
+        this.updateUI();
+    }
+}
+
+let game;
+function startGame() {
+    game = new HyperLifeSimulator(
+        document.getElementById('p-name').value,
+        document.getElementById('p-gender').value,
+        document.getElementById('p-religion').value,
+        document.getElementById('p-region').value
+    );
+    document.getElementById('creation-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    game.init();
+}
+</script>
+</body>
+</html>
