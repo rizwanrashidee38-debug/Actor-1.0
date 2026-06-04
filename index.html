@@ -1,11 +1,11 @@
 
                                 
-                  <!DOCTYPE html>
+                                           <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mumbai Dreams: Superstar Life Simulator</title>
+    <title>Mumbai Dreams: Elite Criminal & Stardom Simulator</title>
     <style>
         :root {
             --gold: #ffcc00;
@@ -27,7 +27,7 @@
             padding: 15px;
         }
 
-        .container { max-width: 1350px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
 
         /* Setup Screen */
         #creation-screen {
@@ -52,7 +52,7 @@
 
         /* Layout Grids */
         .main-layout { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; }
-        @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1150px) { .main-layout { grid-template-columns: 1fr; } }
 
         .panel {
             background: var(--card-bg);
@@ -123,7 +123,7 @@
         <header>
             <h1 id="display-name">Actor</h1>
             <p id="display-bio">Bio</p>
-            <div style="color:var(--gold); font-weight:bold; font-size:0.9rem; margin-top:3px;" id="display-date">Day 1 | Month 1</div>
+            <div style="color:var(--gold); font-weight:bold; font-size:0.9rem; margin-top:3px;" id="display-date">Day 1 | Month 1 | Age: 21</div>
         </header>
 
         <!-- Stats Dashboard -->
@@ -138,7 +138,7 @@
 
         <div class="main-layout">
             
-            <!-- COLUMN 1: WARDROBE, ROUTINE & HOUSING -->
+            <!-- COLUMN 1: UPKEEP, WARDROBE & LEGAL UNDERWORLD -->
             <div>
                 <div class="panel">
                     <h2>Dressing & Aesthetics</h2>
@@ -151,16 +151,20 @@
                 </div>
 
                 <div class="panel">
-                    <h2>Daily Upkeep & Routines</h2>
-                    <button class="btn" onclick="game.doRoutine('audition')">🏃 Commute to Aram Nagar Auditions (-₹200)</button>
-                    <button class="btn" onclick="game.doRoutine('gym')">🏋️ Gym Workout & Aesthetic Prep (-₹400)</button>
-                    <button class="btn" onclick="game.doRoutine('rest')">🛌 Rest, Eat Clean & Hydrate (+Energy)</button>
+                    <h2>Stat Upgrades & Training</h2>
+                    <button class="btn" onclick="game.doRoutine('acting_class')">🎭 Take Acting Lessons (-₹5,000, +8 Acting Skill)</button>
+                    <button class="btn" onclick="game.doRoutine('gym')">🏋️ Corporate Gym Training (-₹3,500, +6 Aesthetics)</button>
+                    <button class="btn" onclick="game.doRoutine('audition')"> rickshaw Commute to Casting Blocks (-₹200)</button>
+                    <button class="btn" onclick="game.doRoutine('rest')">🛌 Recover & Order Macro Meals (+Energy)</button>
                 </div>
 
-                <div class="panel">
-                    <h2>Medical Log & Illness</h2>
-                    <div id="health-status-box" class="card">Health: Perfect Body Condition</div>
-                    <button class="btn btn-danger" id="btn-treat-illness" style="display:none;" onclick="game.treatIllness()">Pay for Specialist Medical Treatment</button>
+                <div class="panel" style="border: 1px solid var(--scandal);">
+                    <h2 style="color:var(--scandal);">Underworld, Crime & Extortion</h2>
+                    <div id="legal-status-box" class="card">Legal Records: Clean Profile</div>
+                    <button class="btn btn-danger" onclick="game.commitCrime('tax_evasion')">💸 Evade Taxes / Hidden Accounts (+₹1,50,000, Risk Prosecutions)</button>
+                    <button class="btn btn-danger" onclick="game.commitCrime('insider_trading')">📈 Corporate Insider Tip Scandal (+₹3,00,000, Sanity Loss)</button>
+                    <button class="btn btn-danger" id="btn-blackmail-option" style="display:none;" onclick="game.attemptBlackmail()">😈 Extort/Blackmail Secret Affair Partner</button>
+                    <button class="btn btn-gold" id="btn-bribe-police" style="display:none;" onclick="game.bribeOfficials()">💸 Pay Police/Judiciary Bribe (-₹2,00,000)</button>
                 </div>
 
                 <div class="panel">
@@ -270,7 +274,7 @@ class CompleteActorSimulator {
     constructor(name, gender, religion, region) {
         this.name = name; this.gender = gender; this.religion = religion; this.region = region;
         this.money = 30000; this.energy = 100; this.sanity = 100; this.skill = 10; this.looks = 40; this.rep = 75;
-        this.day = 1; this.month = 1; this.insta = 1500;
+        this.day = 1; this.month = 1; this.insta = 1500; this.age = 21; this.ageDaysCounter = 0;
 
         // Variables
         this.dress = "Casual";
@@ -279,6 +283,11 @@ class CompleteActorSimulator {
         this.housingIndex = 0;
         this.isMonetized = false;
         
+        // Crime & Court System
+        this.wantedLevel = 0;       // 0 to 100 risk allocation
+        this.isProsecuted = false;
+        this.hasBlackmailLeverage = false;
+
         this.partner = null;       // Main Relationship / Marriage
         this.affair = null;        // Side Fling
         this.pregnancyDays = 0;    // Pregnancy tracking step
@@ -302,6 +311,8 @@ class CompleteActorSimulator {
         this.energy = Math.max(0, Math.min(100, this.energy));
         this.sanity = Math.max(0, Math.min(100, this.sanity));
         this.rep = Math.max(0, Math.min(100, this.rep));
+        this.skill = Math.max(0, this.skill);
+        this.looks = Math.max(0, this.looks);
 
         document.getElementById('stat-money').innerText = `₹${this.money.toLocaleString('en-IN')}`;
         document.getElementById('stat-energy').innerText = `${this.energy}%`;
@@ -309,11 +320,11 @@ class CompleteActorSimulator {
         document.getElementById('stat-skill').innerText = this.skill;
         document.getElementById('stat-looks').innerText = this.looks;
         document.getElementById('stat-rep').innerText = `${this.rep}%`;
-        document.getElementById('display-date').innerText = `Day ${this.day} | Month ${this.month}`;
+        document.getElementById('display-date').innerText = `Day ${this.day} | Month ${this.month} | Age: ${this.age}`;
         document.getElementById('current-dress-label').innerText = this.dress;
         document.getElementById('contraceptive-label').innerText = this.contraceptive;
 
-        // Monetization Dashboard Checks
+        // Monetization Checks
         document.getElementById('sm-insta').innerText = this.formatNum(this.insta);
         const monStatus = document.getElementById('sm-monetization');
         const adBtn = document.getElementById('btn-ad-deal');
@@ -327,21 +338,34 @@ class CompleteActorSimulator {
             adBtn.style.display = 'none';
         }
 
+        // Underworld / Legal Panel
+        const legalBox = document.getElementById('legal-status-box');
+        const bribeBtn = document.getElementById('btn-bribe-police');
+        const extortBtn = document.getElementById('btn-blackmail-option');
+        
+        extortBtn.style.display = this.hasBlackmailLeverage ? 'block' : 'none';
+        bribeBtn.style.display = this.wantedLevel > 20 ? 'block' : 'none';
+
+        if (this.isProsecuted) {
+            legalBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🚨 UNDER PROSECUTION</span><br><small>ED/CBI raids pending. Core career functionality restricted.</small>`;
+        } else if (this.wantedLevel > 40) {
+            legalBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">⚠️ Police Investigation Active</span><br><small>Heat Level: ${this.wantedLevel}%</small>`;
+        } else {
+            legalBox.innerText = "Legal Records: Clean Profile";
+        }
+
         // Illness layout panel
         const hBox = document.getElementById('health-status-box');
-        const hBtn = document.getElementById('btn-treat-illness');
         if (this.illness) {
-            hBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">⚠️ Illness: ${this.illness.name}</span><br><small>Effects: ${this.illness.desc}</small>`;
-            hBtn.style.display = 'block';
+            hBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">⚠️ Pathology: ${this.illness.name}</span><br><small>Effects: ${this.illness.desc}</small>`;
         } else {
             hBox.innerText = "Health: Perfect Body Condition";
-            hBtn.style.display = 'none';
         }
 
         // Housing
         document.getElementById('housing-box').innerHTML = `<strong>Unit:</strong> ${HOUSING_LIST[this.housingIndex].name}<br><small>Rent: ₹${HOUSING_LIST[this.housingIndex].rent.toLocaleString('en-IN')}/mo</small>`;
 
-        // Primary Relationship UI Management
+        // Primary Relationship UI
         const rBox = document.getElementById('relationship-box');
         const rControls = document.getElementById('relationship-controls');
         if (this.partner) {
@@ -358,7 +382,7 @@ class CompleteActorSimulator {
             rControls.style.display = 'none';
         }
 
-        // Dark Side Affair UI Management
+        // Dark Side Affair UI
         const affBox = document.getElementById('affair-box');
         const affSexBtn = document.getElementById('btn-affair-sex');
         if (this.affair) {
@@ -374,7 +398,7 @@ class CompleteActorSimulator {
         const pregCtrl = document.getElementById('pregnancy-controls');
         const kidBox = document.getElementById('children-box');
         if (this.pregnancyDays > 0) {
-            pregBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🤰 PREGNANT (${Math.floor(this.pregnancyDays / 10)} Weeks)</span><br><small>Energy draining. Noticeable profile change.</small>`;
+            pregBox.innerHTML = `<span style="color:var(--scandal); font-weight:bold;">🤰 PREGNANT (${Math.floor(this.pregnancyDays / 10)} Weeks)</span>`;
             pregCtrl.style.display = 'block';
         } else {
             pregBox.innerText = "No active reproductive developments.";
@@ -382,7 +406,7 @@ class CompleteActorSimulator {
         }
         if (this.children > 0) {
             kidBox.style.display = 'block';
-            kidBox.innerHTML = `👶 Children Raised: ${this.children} (Passive monthly family expenses applied)`;
+            kidBox.innerHTML = `👶 Children Raised: ${this.children}`;
         } else { kidBox.style.display = 'none'; }
 
         // Render Dating Pools
@@ -391,8 +415,7 @@ class CompleteActorSimulator {
             dmBox.innerHTML += `
                 <div class="card">
                     <strong>${prof.name}</strong> (${prof.religion})<br>
-                    <small>Profile: ${prof.type} | Value Score: ${prof.statusValue}</small><br>
-                    <button class="btn btn-gold" style="margin-top:4px; padding:2px; font-size:0.7rem;" onclick="game.initiateDating(${idx})">Ask Out / Pursue</button>
+                    <button class="btn btn-gold" style="margin-top:4px; padding:2px; font-size:0.7rem;" onclick="game.initiateDating(${idx})">Ask Out</button>
                 </div>`;
         });
 
@@ -403,13 +426,17 @@ class CompleteActorSimulator {
         } else { pBox.innerText = "No running shoot contracts. Submit tapes below:"; }
 
         const audBox = document.getElementById('auditions-box'); audBox.innerHTML = '';
-        this.availableAuditions.forEach((aud, idx) => {
-            audBox.innerHTML += `
-                <div class="card" style="border-color:var(--gold);">
-                    <strong>${aud.title}</strong><br><small>Pay: ₹${aud.pay.toLocaleString('en-IN')} | Req Skill: ${aud.reqSkill}</small>
-                    <button class="btn" style="margin-top:4px; padding:2px;" onclick="game.giveAudition(${idx})">Give Screen Test</button>
-                </div>`;
-        });
+        if (!this.isProsecuted) {
+            this.availableAuditions.forEach((aud, idx) => {
+                audBox.innerHTML += `
+                    <div class="card" style="border-color:var(--gold);">
+                        <strong>${aud.title}</strong><br><small>Pay: ₹${aud.pay.toLocaleString('en-IN')}</small>
+                        <button class="btn" style="margin-top:4px; padding:2px;" onclick="game.giveAudition(${idx})">Give Screen Test</button>
+                    </div>`;
+            });
+        } else {
+            audBox.innerHTML = `<div style="color:var(--scandal); font-weight:bold; font-size:0.8rem;">Casting access locked by corporate court order.</div>`;
+        }
 
         const awBox = document.getElementById('awards-box');
         awBox.innerHTML = this.awards.length > 0 ? this.awards.map(a => `🏆 ${a}`).join('<br>') : "No awards on shelf.";
@@ -436,278 +463,169 @@ class CompleteActorSimulator {
 
     changeContraceptive() {
         this.contraceptive = document.getElementById('select-contraceptive').value;
-        this.log(`💊 Protection Protocol: Switched to ${this.contraceptive}.`);
         this.updateUI();
     }
 
-    generateDatingMarket() {
-        this.marketProfiles = [];
-        const poolNames = ["Aarav Malhotra", "Zayn Khan", "Rohan Kapoor", "Ananya Pandey", "Meera Iyer", "Sania Sheikh"];
-        const religions = ["Hindu (Traditional)", "Muslim (Traditional)", "Christian (Goan)", "Sikh (Punjabi Roots)"];
-        const types = ["Struggling Model", "Nepo-Kid Influencer", "Indie Film Director", "Bandra Corporate Elite"];
-        
-        for (let i = 0; i < 3; i++) {
-            this.marketProfiles.push({
-                name: poolNames[Math.floor(Math.random() * poolNames.length)],
-                religion: religions[Math.floor(Math.random() * religions.length)],
-                type: types[Math.floor(Math.random() * types.length)],
-                statusValue: Math.floor(20 + Math.random() * 70),
-                love: 45, secret: true, liveIn: false, married: false
-            });
+    doRoutine(type) {
+        if (this.isProsecuted && type !== 'rest') {
+            return alert("You are bound to local judicial reporting! Focus on survival or processing bribes.");
         }
-    }
 
-    initiateDating(idx) {
-        if (this.partner) return alert("You are already committed to a primary partner! Break up or manage a dark side affair.");
-        this.partner = this.marketProfiles[idx];
-        this.marketProfiles.splice(idx, 1);
-        this.log(`❤️ New Relationship: You started dating ${this.partner.name}. The status is Secret by default.`);
-        this.updateUI();
-    }
-
-    toggleRelationshipStatus() {
-        if (!this.partner) return;
-        this.partner.secret = !this.partner.secret;
-        if (!this.partner.secret) {
-            this.log(`📸 Going Public: Paparazzi spotted you with ${this.partner.name}. Social feeds went wild!`);
-            this.insta += 10000;
-            if (this.partner.religion !== this.religion) {
-                this.rep -= 20;
-                this.log(`🚨 Conservative Backlash: Online trolls target your inter-faith relationship status.`);
-            }
-        } else { this.log(`🤫 Hidden status restored with your partner.`); }
-        this.updateUI();
-    }
-
-    toggleLiveIn() {
-        if (!this.partner) return;
-        if (this.housingIndex < 1) return alert("Your current shared PG apartment is too small for a live-in arrangement!");
-        this.partner.liveIn = !this.partner.liveIn;
-        if (this.partner.liveIn) {
-            this.log(`🔑 Live-In Triggered: ${this.partner.name} moved in with you.`);
-            if (this.religion.includes("Muslim") || this.religion.includes("Hindu")) {
-                this.rep -= 15;
-                this.log(`⚠️ Moral Alert: Traditional relatives caught rumors of your unmarried live-in status.`);
-            }
-        } else { this.log(`🏠 Separate roofs restored.`); }
-        this.updateUI();
-    }
-
-    datePartner() {
-        if (!this.partner) return;
-        if (this.money < 8000) return alert("Insufficient cash assets for premium Bandra dates.");
-        this.money -= 8000; this.partner.love = Math.min(100, this.partner.love + 20);
-        this.energy -= 10;
-        this.log(`🥂 Luxury Date: Spent high-value time with ${this.partner.name}.`);
-        
-        if (this.contraceptive === "None" && Math.random() > 0.4) {
-            this.triggerPregnancyEngine();
+        if (type === 'acting_class') {
+            if (this.money < 5000) return alert("Broke!");
+            this.money -= 5000; this.skill += 8; this.energy -= 10;
+            this.log(`🎭 Acting Module: Attended workshops by NSD veterans. Screen execution raised.`);
+        } else if (type === 'gym') {
+            if (this.money < 3500) return alert("Broke!");
+            this.money -= 3500; this.looks += 6; this.energy -= 15;
+            this.log(`🏋️ Body Sculpting: Performed target muscle transformations at a celebrity center.`);
+        } else if (type === 'audition') {
+            this.money -= 200; this.energy -= 15;
+            this.log(`rickshaw Auto Ride: Toured executive casting lobbies in Aram Nagar.`);
+        } else if (type === 'rest') {
+            this.energy = Math.min(100, this.energy + 35); this.sanity = Math.min(100, this.sanity + 10);
+            this.log(`🛌 System Reset: Recovered physiological vitals.`);
         }
-        this.updateUI();
+        this.tickDay();
     }
 
-    proposeMarriage() {
-        if (!this.partner) return;
-        this.log(`💍 Proposal Evaluation: You popped the question to ${this.partner.name}...`);
-        
-        // Acceptance metrics checking
-        let score = (this.partner.love * 0.5) + (this.housingIndex * 15) + (this.money / 25000);
-        if (this.partner.religion !== this.religion) score -= 25;
-
-        if (score > 65) {
-            this.partner.married = true; this.partner.secret = false;
-            this.log(`🎉 YES! ${this.partner.name} accepted your proposal! Settle wedding layouts.`);
-            this.money -= 150000; this.rep += 15; this.insta += 25000;
-        } else {
-            this.sanity -= 30;
-            this.log(`❌ DECLINED: ${this.partner.name} said No. They feel your financial tier or cultural background alignment is insufficient.`);
+    commitCrime(type) {
+        if (type === 'tax_evasion') {
+            this.money += 150000; this.wantedLevel += 25; this.rep -= 10;
+            this.log(`💸 Financial Fraud: Stashed book cash allocations away in ghost shell accounts. Money received, but look out for tax audits!`);
+        } else if (type === 'insider_trading') {
+            this.money += 300000; this.wantedLevel += 40; this.sanity -= 15;
+            this.log(`📈 Black Market Tip: Traded private corporate assets leaked by high-net-worth investors.`);
         }
-        this.updateUI();
-    }
-
-    breakup() {
-        if (!this.partner) return;
-        this.log(`💔 Dissolution: Broken up with ${this.partner.name}.`);
-        this.partner = null; this.sanity -= 20;
-        this.updateUI();
-    }
-
-    triggerPregnancyEngine() {
-        if (this.gender === "Male") {
-            if (this.partner) {
-                this.log(`🤰 Partner Update: ${this.partner.name} announced she is pregnant with your child!`);
-                if (!this.partner.married) {
-                    this.rep -= 20; this.log(`🚨 Scandal: Tabloids leak updates of an out-of-wedlock child.`);
-                }
-            }
-            return;
-        }
-        if (this.pregnancyDays > 0) return;
-        this.pregnancyDays = 1;
-        this.log(`🤰 HEALTH INCIDENT: A rapid test confirmed you are PREGNANT.`);
-    }
-
-    triggerAbortion() {
-        if (this.pregnancyDays === 0) return;
-        this.money -= 25000; this.sanity -= 35; this.energy -= 30;
-        this.log(`🏥 Medical Case: Underwent a secret clinic abortion to protect your career tracking.`);
-        this.pregnancyDays = 0;
-        if (Math.random() > 0.85) {
-            this.rep -= 30; this.log(`🚨 Expose Leaked: Information regarding your abortion surfaced on Reddit entertainment channels.`);
-        }
-        this.updateUI();
-    }
-
-    executeBrandDeal() {
-        if (!this.isMonetized) return;
-        let payment = Math.floor(this.insta * 0.5);
-        this.money += payment; this.rep = Math.max(10, this.rep - 6);
-        this.log(`💸 Ad Integration: Promoted a luxury brand line on your social profiles. Earned ₹${payment.toLocaleString('en-IN')}.`);
-        this.updateUI();
+        this.checkProsecutionChance();
+        this.tickDay();
     }
 
     findAffair() {
-        const targets = ["Married A-List Director", "Co-Lead Star Child", "Studio Financing Head"];
+        const targets = ["Married Production Magnate", "A-List Industry Nepo Child", "Studio Managing Executive"];
         this.affair = { name: targets[Math.floor(Math.random() * targets.length)], obsession: 50 };
-        this.log(`🔥 Covert Sector: Commenced a dangerous secret affair with a ${this.affair.name}.`);
+        this.hasBlackmailLeverage = true;
+        this.log(`🔥 Illicit Sector: Commenced a secret affair with ${this.affair.name}. Secret logs/photos collected!`);
         this.updateUI();
     }
 
     haveAffairSex() {
         if (!this.affair) return;
         this.affair.obsession = Math.min(100, this.affair.obsession + 15);
-        this.log(`🥵 Discreet Hookup: Slipped away into a backstage vanity van with ${this.affair.name}.`);
-        
-        if (this.contraceptive === "None") {
-            if (Math.random() > 0.6) this.triggerPregnancyEngine();
-            if (Math.random() > 0.8) {
-                this.illness = { name: "Reproductive Infection", desc: "-10% daily energy capacities until treated." };
-                this.log(`⚠️ Complication: Contracted a secret physical infection due to unprotected sex.`);
-            }
-        }
-
-        // Discovery system weights
-        let leakChance = this.partner ? 0.35 : 0.10;
-        if (Math.random() < leakChance) {
-            this.log(`🚨 SPICY EXPOSE: Tabloids leaked clear evidence of your illicit affair!`);
-            this.rep -= 50;
-            if (this.partner) {
-                this.log(`💔 Breakup: Your main partner discovered the affair and walked out immediately.`);
-                this.partner = null;
-            }
-            this.affair = null;
-        }
+        this.log(`🥵 Backstage Rendezvous: Vanity van encounter completed.`);
+        if (Math.random() < 0.2) this.triggerPregnancyEngine();
         this.tickDay();
     }
 
-    treatIllness() {
-        if (!this.illness) return;
-        this.money -= 20000; this.illness = null;
-        this.log(`🏥 Medical Clearance: Treatment successful. Body pathology resolved.`);
+    attemptBlackmail() {
+        if (!this.affair) return;
+        this.money += 200000; this.rep -= 30; this.sanity -= 20; this.wantedLevel += 30;
+        this.log(`😈 Extortion: Threatened to send secret messages/photos to your partner's family if they didn't pay up! Extorted ₹2,00,000 cash, but their gang ties might hit back.`);
+        this.hasBlackmailLeverage = false;
+        this.checkProsecutionChance();
         this.updateUI();
     }
 
-    doRoutine(type) {
-        if (type === 'audition') {
-            this.money -= 200; this.energy -= 15;
-            this.log(`🚇 Commuted via Western Line auto-rickshaws to Aram Nagar production blocks.`);
-        } else if (type === 'gym') {
-            this.money -= 400; this.energy -= 20; this.looks += 2;
-            this.log(`🏋️ Performed physical training transformations. Aesthetics increased.`);
-        } else if (type === 'rest') {
-            this.energy = Math.min(100, this.energy + 35); this.sanity = Math.min(100, this.sanity + 10);
-            this.log(`🛌 Rest Stage: Recovered body baselines using Swiggy diet orders.`);
+    bribeOfficials() {
+        if (this.money < 200000) return alert("Not enough money to satisfy the commissioner.");
+        this.money -= 200000; this.wantedLevel = 0; this.isProsecuted = false;
+        this.log(`💸 System Lubricated: Slipped a heavy cash case down corporate legal chains. Investigation dropped!`);
+        this.updateUI();
+    }
+
+    checkProsecutionChance() {
+        if (this.wantedLevel > 60 && !this.isProsecuted) {
+            if (Math.random() * 100 < this.wantedLevel) {
+                this.isProsecuted = true;
+                this.currentProject = null;
+                this.log(`🚨 COURT SUMMONS EXECUTION: The Sessions Court frozen your standard media assets. Extravagant litigation starts now!`);
+            }
         }
-        this.tickDay();
+    }
+
+    generateDatingMarket() {
+        this.marketProfiles = [{ name: "Aarav Malhotra", religion: "Hindu", type: "Influencer", love: 50, secret: true, liveIn: false, married: false }];
+    }
+
+    initiateDating(idx) {
+        this.partner = this.marketProfiles[idx]; this.marketProfiles.splice(idx, 1);
+        this.updateUI();
+    }
+
+    toggleRelationshipStatus() { if(this.partner) this.partner.secret = !this.partner.secret; this.updateUI(); }
+    toggleLiveIn() { if(this.partner) this.partner.liveIn = !this.partner.liveIn; this.updateUI(); }
+    datePartner() { if(this.partner) this.partner.love = Math.min(100, this.partner.love + 20); this.updateUI(); }
+    proposeMarriage() { if(this.partner) this.partner.married = true; this.updateUI(); }
+    breakup() { this.partner = null; this.updateUI(); }
+
+    triggerPregnancyEngine() {
+        if (this.pregnancyDays > 0) return;
+        this.pregnancyDays = 1; this.log(`🤰 Physiological Alert: Test parameters reveal pregnancy.`);
+    }
+
+    triggerAbortion() {
+        this.pregnancyDays = 0; this.money -= 25000; this.sanity -= 30; this.log(`🏥 Medical Reset executed.`); this.updateUI();
+    }
+
+    executeBrandDeal() {
+        let pay = Math.floor(this.insta * 0.5); this.money += pay; this.updateUI();
     }
 
     giveAudition(idx) {
         const aud = this.availableAuditions[idx];
-        if (this.currentProject) return alert("You are already active under a film shooting calendar schedule!");
-        
-        let successChance = 35 + (this.skill - aud.reqSkill) + (this.looks * 0.2);
-        if (this.pregnancyDays > 120) successChance -= 40; // Visible bodily updates affect casting selections
-
-        if (Math.random() * 100 < Math.max(5, successChance)) {
+        if (Math.random() * 100 < 50) {
             this.currentProject = { ...aud, timeLeft: aud.duration };
-            this.log(`🎉 Role Win! Secured active assignment for "${aud.title}". Filming begins.`);
-            this.availableAuditions.splice(idx, 1);
-        } else {
-            this.log(`❌ Rejected: Casting boards passed on your test clip.`);
-            this.sanity -= 5;
+            this.log(`🎉 Selected: Signed to cast list for "${aud.title}".`);
         }
         this.tickDay();
     }
 
-    upgradeHousing() {
-        if (this.housingIndex >= HOUSING_LIST.length - 1) return alert("Holding peak real estate assets.");
-        let target = HOUSING_LIST[this.housingIndex + 1];
-        if (this.money < target.rent * 2) return alert("Insufficient liquid savings for booking security deposits.");
-        this.housingIndex++;
-        this.log(`🏢 Flat Relocation: Moved into ${target.name}.`);
-        this.updateUI();
-    }
-
-    generateAuditions() {
-        this.availableAuditions = [];
-        CASTING_CALLS.forEach(c => this.availableAuditions.push({...c}));
-    }
+    upgradeHousing() { this.housingIndex = Math.min(HOUSING_LIST.length - 1, this.housingIndex + 1); this.updateUI(); }
+    generateAuditions() { this.availableAuditions = [...CASTING_CALLS]; }
 
     tickDay() {
         this.day += 1;
+        this.ageDaysCounter += 1;
 
-        // Pregnancy progressions
+        // AGEING BIOLOGICAL DRIFT MECHANIC
+        if (this.ageDaysCounter >= 90) { // Every 3 months real-time game counter drops stats
+            this.age += 1;
+            this.ageDaysCounter = 0;
+            
+            // Age decay structures scale heavier as timeline grows
+            let decayFactor = this.age > 40 ? 3 : 1;
+            this.looks -= (2 * decayFactor);
+            this.skill -= (1 * decayFactor);
+            this.log(`🧓 Biological Shift: You turned ${this.age}. Skin textures and raw muscle capabilities noticeability dropped.`);
+        }
+
+        // Processing law enforcement actions
+        if (this.isProsecuted && Math.random() > 0.85) {
+            this.isProsecuted = false;
+            this.wantedLevel = 0;
+            let prisonFine = Math.floor(this.money * 0.6);
+            this.money -= prisonFine;
+            this.sanity -= 40;
+            this.log(`⚖️ JUDICIAL VERDICT OUT: Convicted of felony counts. Corporate assets penalization of ₹${prisonFine.toLocaleString('en-IN')} paid out to escape serving hard time.`);
+        }
+
+        // Standard loops
         if (this.pregnancyDays > 0) {
-            this.pregnancyDays += 3;
-            this.energy -= 4;
-            if (this.pregnancyDays >= 270) {
-                if (this.gender === "Female") {
-                    this.children += 1;
-                    this.log(`👶 BIRTH ACCLAIM: You delivered a child safely at a private hospital in Juhu!`);
-                    if (this.currentProject) {
-                        this.log(`🚫 Project Termination: Missed filming calendars due to child birth; producers terminated the contract.`);
-                        this.currentProject = null;
-                    }
-                }
-                this.pregnancyDays = 0;
-            }
+            this.pregnancyDays += 4;
+            if (this.pregnancyDays >= 270) { this.children += 1; this.pregnancyDays = 0; this.log(`👶 Child Born.`); }
         }
 
-        // Random Illness vectors
-        if (!this.illness && Math.random() > 0.96) {
-            this.illness = { name: "Dengue Fever / Fatigue crisis", desc: "-15% energy metrics per turn cycle." };
-            this.log(`🚨 HEALTH ALERT: Medical diagnosis confirmed you caught ${this.illness.name}.`);
-        }
-
-        // Project tracker steps
         if (this.currentProject && this.day % 10 === 0) {
             this.currentProject.timeLeft -= 1;
-            if (this.currentProject.timeLeft <= 0) {
-                this.money += this.currentProject.pay; this.insta += this.currentProject.fame;
-                this.log(`🎬 Schedule Wrap! Paid contract completed for "${this.currentProject.title}". Distributed: +₹${this.currentProject.pay.toLocaleString('en-IN')}`);
-                this.currentProject = null;
-            }
+            if (this.currentProject.timeLeft <= 0) { this.money += this.currentProject.pay; this.insta += this.currentProject.fame; this.currentProject = null; }
         }
 
-        // Monthly accounting parameters
         if (this.day > 30) {
             this.day = 1; this.month += 1;
-            let costs = HOUSING_LIST[this.housingIndex].rent + (this.children * 12000);
-            this.money -= costs;
-            this.log(`📅 Bills Summary: Paid rent & family upkeep charges totaling: ₹${costs.toLocaleString('en-IN')}`);
-            
-            // Monetized active payout lines
-            if (this.isMonetized) {
-                let passiveRev = Math.floor(this.insta * 0.08);
-                this.money += passiveRev;
-                this.log(`📈 Social Monetization: Collected passive distribution income of ₹${passiveRev.toLocaleString('en-IN')}`);
-            }
-
-            if (this.partner) this.partner.love = Math.max(0, this.partner.love - 6);
-            this.generateDatingMarket();
+            this.money -= HOUSING_LIST[this.housingIndex].rent;
             this.generateAuditions();
+            this.generateDatingMarket();
         }
-
         this.updateUI();
     }
 }
@@ -727,4 +645,4 @@ function startGame() {
 </script>
 </body>
 </html>
-              
+               
